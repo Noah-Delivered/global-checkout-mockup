@@ -275,7 +275,8 @@ var PARENT_BASE=(function(){try{if(!IS_EMBEDDED&&/^https?:/.test(location.href))
 var APP_URL=location.href;
 try{window.__DK_MOCKUP__=true}catch(e){}
 var PARENT_IS_MOCKUP=(function(){try{return IS_EMBEDDED&&window.parent&&window.parent!==window&&window.parent.__DK_MOCKUP__===true}catch(e){return false}})();
-function handleReturn(u){if(!/^https?:/i.test(u))return;if(/\/order\/complete/.test(u)){state.cart=[];state.returnPage='home';try{sessionStorage.removeItem('dkShellCart')}catch(e){}}state.frameKind='order';state.frameSrc=u;state.frameError='';state.page='frame';render()}
+function isPaidReturn(u){u=String(u||'');return /\/order\/complete/.test(u)||(/\/payment\/in-progress/.test(u)&&/[?&]orderId=/.test(u))}
+function handleReturn(u){if(!/^https?:/i.test(u))return;if(isPaidReturn(u)){state.cart=[];state.returnPage='home';try{sessionStorage.removeItem('dkShellCart')}catch(e){}}state.frameKind='order';state.frameSrc=u;state.frameError='';state.page='frame';render()}
 function saveShellState(){try{sessionStorage.setItem('dkShell',JSON.stringify({version:state.version,globalOverseas:state.globalOverseas,cart:state.cart,productId:state.productId,returnPage:state.returnPage||'home',appUrl:APP_URL}))}catch(e){}}
 function loadShellState(){try{var raw=sessionStorage.getItem('dkShell');if(!raw)return null;return JSON.parse(raw)}catch(e){return null}}
 function pendingFrameUrl(){var s=location.search||'';if(s.indexOf('?url=')!==0)return '';var v=s.slice(5);if(!v)return '';try{if(/%3A%2F%2F/i.test(v))v=decodeURIComponent(v)}catch(e){}v=v.replace(/%3D/gi,'=').replace(/%26/gi,'&');return /^https?:/i.test(v)?v:''}
@@ -365,6 +366,6 @@ setInterval(tickClock,20000);
 var RELAYED=false;
 (function(){var back=pendingFrameUrl();if(!back)return;
  if(PARENT_IS_MOCKUP){RELAYED=true;try{window.parent.postMessage({type:'dk-inner-return',url:back},'*')}catch(e){}try{document.documentElement.style.background='#fff';var a=document.getElementById('app');if(a)a.innerHTML=''}catch(e2){}return}
- if(/\/order\/complete/.test(back)){try{sessionStorage.removeItem('dkShellCart')}catch(e){}}var saved=loadShellState();if(saved){state.version=saved.version||state.version;state.globalOverseas=saved.globalOverseas!==false;state.cart=saved.cart||state.cart;state.productId=saved.productId||state.productId;state.returnPage=saved.returnPage||'home'}state.modalOpen=false;state.frameKind='order';state.frameSrc=back;state.frameError='';state.page='frame';if(/\/order\/complete/.test(back)){state.cart=[];state.returnPage='home'}})();
+ if(isPaidReturn(back)){try{sessionStorage.removeItem('dkShellCart')}catch(e){}}var saved=loadShellState();if(saved){state.version=saved.version||state.version;state.globalOverseas=saved.globalOverseas!==false;state.cart=saved.cart||state.cart;state.productId=saved.productId||state.productId;state.returnPage=saved.returnPage||'home'}state.modalOpen=false;state.frameKind='order';state.frameSrc=back;state.frameError='';state.page='frame';if(isPaidReturn(back)){state.cart=[];state.returnPage='home'}})();
 if(!RELAYED)render();
 </script></body></html>
